@@ -1,0 +1,42 @@
+.gantt_task_line {
+  border-radius: 4px;
+  height: 16px !important;
+}
+
+.gantt_task_line.milestone-task {
+  width: 16px !important;
+  height: 16px !important;
+  transform: rotate(45deg);
+  margin-left: -8px;
+}
+
+.gantt_task_content {
+  line-height: 16px;
+  color: #fff;
+  font-size: 12px;
+}
+
+.gantt_grid_head_cell {
+  font-weight: 600;
+  color: #374151;
+}
+
+.gantt_grid_data {
+  color: #4b5563;
+}
+
+.gantt_task_link {
+  border-color: #9ca3af;
+}
+
+.gantt_task_link:hover {
+  border-color: #6b7280;
+}
+
+.gantt_link_arrow {
+  border-color: #9ca3af;
+}
+
+.gantt_task_progress {
+  background-color: rgba(0, 0, 0, 0.2);
+}

@@ -1,0 +1,84 @@
+/* Excel-like table styles */
+.excel-grid {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  .excel-grid th,
+  .excel-grid td {
+    border: 1px solid #e2e8f0;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .excel-grid th {
+    background-color: #f8fafc;
+    font-weight: 500;
+    color: #64748b;
+    position: relative;
+    user-select: none;
+  }
+  
+  .excel-grid tr:hover {
+    background-color: #f1f5f9;
+  }
+  
+  .excel-grid .resizer {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: transparent;
+    cursor: col-resize;
+    user-select: none;
+    touch-action: none;
+  }
+  
+  .excel-grid .resizer:hover,
+  .excel-grid .resizing {
+    background-color: #3b82f6;
+  }
+  
+  .excel-grid .cell-content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .excel-grid .editable-cell {
+    cursor: pointer;
+  }
+  
+  .excel-grid .editable-cell:hover {
+    background-color: #e2e8f0;
+    border-radius: 2px;
+  }
+  
+  .excel-grid input {
+    width: 100%;
+    padding: 2px 4px;
+    font-size: 0.75rem;
+    border: 1px solid #3b82f6;
+    border-radius: 2px;
+    outline: none;
+  }
+  
+  .excel-grid .date-cell {
+    width: 100%;
+    text-align: left;
+  }
+  
+  .excel-grid .milestone-indicator {
+    color: #3b82f6;
+    margin-right: 4px;
+    flex-shrink: 0;
+  }
+  
+  .excel-grid .status-not-started { color: #64748b; }
+  .excel-grid .status-in-progress { color: #3b82f6; }
+  .excel-grid .status-completed { color: #22c55e; }
+  .excel-grid .status-delayed { color: #ef4444; }

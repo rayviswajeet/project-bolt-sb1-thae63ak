@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Task {
+  id              String    @id @default(uuid())
+  siNo            Int       @unique
+  wbsNo           String
+  taskName        String
+  predecessorIds  String? // Comma-separated SI numbers
+  duration        Int?
+  startDate       DateTime?
+  endDate         DateTime?
+  actualStartDate DateTime?
+  actualEndDate   DateTime?
+  actualDuration  Int?
+  level           Int       @default(0)
+  isMilestone     Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([siNo])
+  @@index([level])
+  @@index([predecessorIds])
+}
