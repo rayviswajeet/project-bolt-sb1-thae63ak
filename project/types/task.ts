@@ -1,8 +1,8 @@
 export interface Remark {
   id: string;
-  text: string;
+  content: string;
+  date: Date;
   author: string;
-  timestamp: Date;
   response?: {
     text: string;
     author: string;
@@ -47,7 +47,14 @@ export interface Task {
   isParent?: boolean;
 }
 
-export type TaskUpdate = Partial<Omit<Task, 'id' | 'createdAt' | 'updatedAt'>>;
+export type TaskUpdate = Partial<Task>;
+
+export interface Template {
+  id: string;
+  name: string;
+  tasks: Task[];
+  createdAt: Date;
+}
 
 // Predefined stages
 export const STAGES: Stage[] = [

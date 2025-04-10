@@ -50,6 +50,7 @@ import {
 import Link from 'next/link';
 import { createTemplate, saveTemplate, loadTemplatesFromStorage, convertTemplateTasks, Template } from '@/lib/templateUtils';
 import SaveTemplateModal from '@/components/modals/SaveTemplateModal';
+import * as dateUtils from '@/lib/dateUtils';
 
 interface TaskTableProps {
   initialTasks: Task[];
@@ -445,32 +446,15 @@ export default function TaskTable({ initialTasks }: TaskTableProps) {
 
   // Task Row Functions
   const calculateEndDate = (startDate: Date, duration: number): Date => {
-    // For 1-day tasks, end date is the same as start date
-    if (duration === 1) {
-      return new Date(startDate);
-    }
-    
-    // For multi-day tasks, add (duration - 1) days to start date
-    const normalizedDate = new Date(startDate);
-    normalizedDate.setHours(0, 0, 0, 0);
-    return addDays(normalizedDate, duration - 1);
+    if (!startDate || !duration) return new Date();
+    // This now automatically respects holiday exclusions from dateUtils
+    return dateUtils.calculateEndDate(startDate, duration);
   };
 
   const calculateDuration = (startDate: Date, endDate: Date): number => {
-    // Normalize dates to midnight to ensure accurate day calculation
-    const normalizedStart = new Date(startDate);
-    normalizedStart.setHours(0, 0, 0, 0);
-    
-    const normalizedEnd = new Date(endDate);
-    normalizedEnd.setHours(0, 0, 0, 0);
-    
-    // If same day, duration is 1
-    if (normalizedStart.getTime() === normalizedEnd.getTime()) {
-      return 1;
-    }
-    
-    // Otherwise calculate difference in days and add 1
-    return differenceInDays(normalizedEnd, normalizedStart) + 1;
+    if (!startDate || !endDate) return 0;
+    // This now automatically respects holiday exclusions from dateUtils
+    return dateUtils.calculateDuration(startDate, endDate);
   };
 
   const detectCircularDependency = (task: Task, predecessorIds: string): boolean => {

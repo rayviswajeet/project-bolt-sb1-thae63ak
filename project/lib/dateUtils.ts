@@ -1,29 +1,34 @@
 import { addDays, differenceInDays, isFuture } from 'date-fns';
 import { Task } from '@/types/task';
+import { isHoliday } from '@/store/holidayStore';
 
 /**
  * Calculate end date based on start date and duration
  * For duration = 1, end date = start date (same day)
  * For duration > 1, end date = start date + (duration - 1) days
+ * Takes into account holiday exclusions based on settings
  */
-export function calculateEndDate(startDate: Date, duration: number, excludeWeekends: boolean = false): Date {
+export function calculateEndDate(startDate: Date, duration: number, excludeHolidays: boolean = true): Date {
   // For 1-day tasks, end date is the same as start date
   if (duration === 1) return new Date(startDate);
   
-  if (!excludeWeekends) {
-    // For regular calendar days, add (duration - 1) days
+  // For regular calendar days without holiday exclusion
+  if (!excludeHolidays) {
     return addDays(startDate, duration - 1);
   }
 
-  // For business days with weekends excluded
+  // For days with holiday exclusion
   let result = new Date(startDate);
+  let daysToAdd = duration - 1; // we count the start date itself as 1 day
   let daysAdded = 0;
   
-  // For multi-day tasks, add (duration - 1) business days
-  while (daysAdded < duration - 1) {
+  while (daysAdded < daysToAdd) {
     result = addDays(result, 1);
-    // Only count weekdays (Monday-Friday)
-    if (result.getDay() !== 0 && result.getDay() !== 6) daysAdded++;
+    
+    // Skip this day if it's a holiday
+    if (!isHoliday(result)) {
+      daysAdded++;
+    }
   }
   
   return result;
@@ -32,8 +37,9 @@ export function calculateEndDate(startDate: Date, duration: number, excludeWeeke
 /**
  * Calculate duration between two dates
  * If start and end are the same day, duration = 1
+ * Takes into account holiday exclusions based on settings
  */
-export function calculateDuration(startDate: Date, endDate: Date): number {
+export function calculateDuration(startDate: Date, endDate: Date, excludeHolidays: boolean = true): number {
   // If same day, duration is 1
   if (startDate.getFullYear() === endDate.getFullYear() && 
       startDate.getMonth() === endDate.getMonth() && 
@@ -41,8 +47,23 @@ export function calculateDuration(startDate: Date, endDate: Date): number {
     return 1;
   }
   
-  // Otherwise calculate difference in days and add 1
-  return differenceInDays(endDate, startDate) + 1;
+  // If no holiday exclusion, just calculate total days
+  if (!excludeHolidays) {
+    return differenceInDays(endDate, startDate) + 1;
+  }
+  
+  // Count working days between the dates
+  let count = 0;
+  let currentDate = new Date(startDate);
+  
+  while (currentDate <= endDate) {
+    if (!isHoliday(currentDate)) {
+      count++;
+    }
+    currentDate = addDays(currentDate, 1);
+  }
+  
+  return count;
 }
 
 //Task Overlap Detection (Feature i - Additional Logic)
@@ -73,23 +94,23 @@ export function adjustDates(task: Partial<Task>): Partial<Task> {
   // Planned dates
   if (updatedTask.startDate) {
     if (updatedTask.duration && !updatedTask.endDate) {
-      updatedTask.endDate = calculateEndDate(updatedTask.startDate, updatedTask.duration);
+      updatedTask.endDate = calculateEndDate(updatedTask.startDate, updatedTask.duration, true);
     } else if (updatedTask.endDate && !updatedTask.duration) {
-      updatedTask.duration = calculateDuration(updatedTask.startDate, updatedTask.endDate);
+      updatedTask.duration = calculateDuration(updatedTask.startDate, updatedTask.endDate, true);
     } else if (updatedTask.duration && updatedTask.endDate) {
       // If all three exist, prioritize duration and recalculate end date
-      updatedTask.endDate = calculateEndDate(updatedTask.startDate, updatedTask.duration);
+      updatedTask.endDate = calculateEndDate(updatedTask.startDate, updatedTask.duration, true);
     }
   }
 
   // Actual dates
   if (updatedTask.actualStartDate) {
     if (updatedTask.actualDuration && !updatedTask.actualEndDate) {
-      updatedTask.actualEndDate = calculateEndDate(updatedTask.actualStartDate, updatedTask.actualDuration);
+      updatedTask.actualEndDate = calculateEndDate(updatedTask.actualStartDate, updatedTask.actualDuration, true);
     } else if (updatedTask.actualEndDate && !updatedTask.actualDuration) {
-      updatedTask.actualDuration = calculateDuration(updatedTask.actualStartDate, updatedTask.actualEndDate);
+      updatedTask.actualDuration = calculateDuration(updatedTask.actualStartDate, updatedTask.actualEndDate, true);
     } else if (updatedTask.actualDuration && updatedTask.actualEndDate) {
-      updatedTask.actualDuration = calculateDuration(updatedTask.actualStartDate, updatedTask.actualEndDate);
+      updatedTask.actualDuration = calculateDuration(updatedTask.actualStartDate, updatedTask.actualEndDate, true);
     }
   }
 
