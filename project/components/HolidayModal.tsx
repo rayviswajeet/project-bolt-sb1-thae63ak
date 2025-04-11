@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
+import { DateRange } from "react-day-picker";
 import { format, eachDayOfInterval, startOfDay, endOfDay } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,10 +44,7 @@ export function HolidayModal({ open, onClose }: HolidayModalProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   
   // Date range selection
-  const [dateRange, setDateRange] = useState<{
-    from: Date | undefined;
-    to: Date | undefined;
-  }>({
+  const [dateRange, setDateRange] = useState<DateRange>({
     from: new Date(),
     to: undefined,
   });
@@ -178,7 +176,7 @@ export function HolidayModal({ open, onClose }: HolidayModalProps) {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => setShowAddForm(!showAddForm)}
+                onClick={() => setShowAddForm(true)}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Holiday
@@ -187,7 +185,11 @@ export function HolidayModal({ open, onClose }: HolidayModalProps) {
 
             {showAddForm && (
               <div className="border rounded-md p-4 space-y-4">
-                <RadioGroup defaultValue="single" className="flex space-x-4 mb-4" onValueChange={(value) => setAddMode(value as "single" | "range")}>
+                <RadioGroup 
+                  defaultValue="single" 
+                  className="flex space-x-4 mb-4" 
+                  onValueChange={(value: string) => setAddMode(value as "single" | "range")}
+                >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="single" id="single" />
                     <Label htmlFor="single">Single Date</Label>
@@ -198,27 +200,33 @@ export function HolidayModal({ open, onClose }: HolidayModalProps) {
                   </div>
                 </RadioGroup>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="date">{addMode === "single" ? "Date" : "Date Range"}</Label>
-                    {addMode === "single" ? (
-                      <Calendar
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={setSelectedDate}
-                        className="rounded-md border"
-                      />
-                    ) : (
-                      <Calendar
-                        mode="range"
-                        selected={dateRange}
-                        onSelect={setDateRange}
-                        className="rounded-md border"
-                        numberOfMonths={2}
-                      />
-                    )}
+                <div className="flex gap-6">
+                  <div className="w-fit">
+                    <Label htmlFor="date" className="block mb-2">{addMode === "single" ? "Date" : "Date Range"}</Label>
+                    <div className="border rounded-md p-2">
+                      {addMode === "single" ? (
+                        <Calendar
+                          mode="single"
+                          selected={selectedDate}
+                          onSelect={setSelectedDate}
+                          numberOfMonths={1}
+                          className="rounded-md"
+                        />
+                      ) : (
+                        <Calendar
+                          mode="range"
+                          selected={dateRange}
+                          onSelect={(range: DateRange | undefined) => 
+                            setDateRange(range || { from: new Date(), to: undefined })
+                          }
+                          numberOfMonths={1}
+                          className="rounded-md"
+                        />
+                      )}
+                    </div>
                   </div>
-                  <div className="space-y-4">
+
+                  <div className="flex-1 space-y-6">
                     <div className="space-y-2">
                       <Label htmlFor="holidayName">Holiday Name</Label>
                       <Input
@@ -236,7 +244,7 @@ export function HolidayModal({ open, onClose }: HolidayModalProps) {
                       />
                       <Label htmlFor="optional">Optional Holiday</Label>
                     </div>
-                    <div className="pt-4 flex space-x-2">
+                    <div className="flex space-x-2 pt-4">
                       <Button onClick={handleAddHoliday}>
                         {addMode === "single" ? "Add Holiday" : "Add Date Range"}
                       </Button>
